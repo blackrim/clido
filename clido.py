@@ -142,7 +142,7 @@ def construct_parser():
     parser.add_argument("-d","--delete",help="delete an item")
     parser.add_argument("-e","--edit",help="edit an item",nargs="+")
     parser.add_argument("-a","--add",help="add an item",nargs="+")
-    parser.add_argument("-s","--show",help="show all the items in a list",action="store_true")
+    parser.add_argument("-s","--show",help="show all the items in a list",action="store_true",default=True)
     parser.add_argument("-m","--makelist",help="create a list",action="store_true")
     return parser
 
