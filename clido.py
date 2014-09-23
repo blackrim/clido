@@ -58,6 +58,13 @@ class TDList:
                         td = TD(spls[0],spls[1],spls[2])
                         self.tds[spls[0]] = td 
                 fl.close()
+                fl = open(mainpath_del,"r")
+                for i in fl:
+                    spls = i.strip().split("||")
+                    if len(spls) > 0:
+                        td = TD(spls[0],spls[1],spls[2])
+                        self.del_tds[spls[0]] = td 
+                fl.close()
                 return
             else:
                 raise TDFilesNotFound
@@ -78,12 +85,10 @@ class TDList:
         dt = datetime.now()
         td = TD(create_hash(description),description,str(dt))
         self.tds[td._id] = td
-        print self.tds,td._id,td.description,td.date
         return
 
     def del_td(self,_idstart):
         match = self.get_tdid(_idstart)
-        print match
         self.del_tds[match] = self.tds[match]
         del self.tds[match]
         return
@@ -95,11 +100,15 @@ class TDList:
         for i in self.tds:
             fl.write(i+"||"+self.tds[i].description+"||"+self.tds[i].date+"\n")
         fl.close()
+        fl = open(mainpath_del,"w")
+        for i in self.del_tds:
+            fl.write(i+"||"+self.del_tds[i].description+"||"+self.del_tds[i].date+"\n")
+        fl.close()
         return
 
     def list_tds(self):
         for i in self.tds:
-            print self.tds[i].date,self.tds[i].description
+            print i[0:5],self.tds[i].date,self.tds[i].description
         return
 
 
@@ -109,13 +118,16 @@ FUNCTIONS
 def create_hash(text):
     return hashlib.sha1(text).hexdigest()
 
+#add
+#   list the lists
+#   unique for not just description?
 def construct_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f","--folder",help="main directory",required=True)
     parser.add_argument("-l","--list",help="the list",required=True)
     parser.add_argument("-d","--delete",help="delete an item")
-    parser.add_argument("-e","--edit",help="edit an item")
-    parser.add_argument("-a","--add",help="add an item")
+    parser.add_argument("-e","--edit",help="edit an item",nargs="+")
+    parser.add_argument("-a","--add",help="add an item",nargs="+")
     parser.add_argument("-s","--show",help="show all the items in a list",action="store_true")
     parser.add_argument("-m","--makelist",help="create a list",action="store_true")
     return parser
@@ -128,7 +140,8 @@ if __name__ == "__main__":
     #not creating a list so doing something else
     tdl = TDList(args.folder,args.list,create=False)
     if args.add:
-        tdl.add_td(args.add)
+        text = " ".join(args.add)
+        tdl.add_td(text)
     elif args.delete:
         tdl.del_td(args.delete)
     elif args.show:
