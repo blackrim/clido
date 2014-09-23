@@ -8,12 +8,13 @@ import sys,os
 CLASSES
 """
 class TColors:
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+    CYAN = '\033[36m'
+    BLUE = '\033[34m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    RED = '\033[31m'
+    WHITE = '\33[37m'
+    ENDC = '\033[39m'
 
 class TDFilesNotFound(Exception):
     def __init__(self):
@@ -121,7 +122,7 @@ class TDList:
             tdsds[i] = self.tds[i].date
         sorted_d = sorted(tdsds.iteritems(), key=operator.itemgetter(1),reverse=False)
         for i in sorted_d:
-            print TColors.GREEN+i[0][0:5]+TColors.ENDC,TColors.HEADER+self.tds[i[0]].date+TColors.ENDC,TColors.FAIL+self.tds[i[0]].description+TColors.ENDC
+            print TColors.GREEN+i[0][0:5]+TColors.ENDC,TColors.CYAN+self.tds[i[0]].date+TColors.ENDC,TColors.RED+self.tds[i[0]].description+TColors.ENDC
         return
 
 
