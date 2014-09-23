@@ -1,11 +1,20 @@
 import argparse
 from datetime import datetime
+import operator
 import hashlib
 import sys,os
 
 """
 CLASSES
 """
+class TColors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
 class TDFilesNotFound(Exception):
     def __init__(self):
         print "files not found"
@@ -107,8 +116,12 @@ class TDList:
         return
 
     def list_tds(self):
+        tdsds = {}
         for i in self.tds:
-            print i[0:5],self.tds[i].date,self.tds[i].description
+            tdsds[i] = self.tds[i].date
+        sorted_d = sorted(tdsds.iteritems(), key=operator.itemgetter(1),reverse=False)
+        for i in sorted_d:
+            print TColors.GREEN+i[0][0:5]+TColors.ENDC,TColors.HEADER+self.tds[i[0]].date+TColors.ENDC,TColors.FAIL+self.tds[i[0]].description+TColors.ENDC
         return
 
 
