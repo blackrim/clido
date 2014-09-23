@@ -1,5 +1,5 @@
 import argparse
-import datetime
+from datetime import datetime
 import hashlib
 import sys,os
 
@@ -20,8 +20,9 @@ class TD:
     """
     this is a particular todo
     """
-    def __init__(self,_id,date):
+    def __init__(self,_id,description,date):
         self._id = _id
+        self.description = description
         self.date = date
 
 
@@ -38,8 +39,8 @@ class TDList:
         self.del_tds = {} #the finished todos
         self.maindir = maindir
         self.label = label
-        mainpath = os.path.join(os.path.expanduser(self.maindir),label)
-        mainpath_del = os.path.join(os.path.expanduser(self.maindir),label+".del")
+        mainpath = os.path.join(os.path.expanduser(self.maindir),self.label)
+        mainpath_del = os.path.join(os.path.expanduser(self.maindir),self.label+".del")
         if create:
             if os.path.exists(mainpath) and os.path.exists(mainpath_del):
                 raise TDFilesExist
@@ -49,9 +50,58 @@ class TDList:
             fl.close()
         else:
             if os.path.exists(mainpath) and os.path.exists(mainpath_del):
+                #need to read the items in the list
+                fl = open(mainpath,"r")
+                for i in fl:
+                    spls = i.strip().split("||")
+                    if len(spls) > 0:
+                        td = TD(spls[0],spls[1],spls[2])
+                        self.tds[spls[0]] = td 
+                fl.close()
                 return
             else:
                 raise TDFilesNotFound
+
+    def get_tdid(self,_idstart):
+        """
+        given the starting text, we try and get the task
+        """
+        match = filter(lambda _id: _id.startswith(_idstart),self.tds.keys())
+        if len(match) == 1:
+            return match[0]
+        elif len(match) == 0:
+            return
+        else:
+            return
+
+    def add_td(self,description):
+        dt = datetime.now()
+        td = TD(create_hash(description),description,str(dt))
+        self.tds[td._id] = td
+        print self.tds,td._id,td.description,td.date
+        return
+
+    def del_td(self,_idstart):
+        match = self.get_tdid(_idstart)
+        print match
+        self.del_tds[match] = self.tds[match]
+        del self.tds[match]
+        return
+
+    def write_tds(self):
+        mainpath = os.path.join(os.path.expanduser(self.maindir),self.label)
+        mainpath_del = os.path.join(os.path.expanduser(self.maindir),self.label+".del")
+        fl = open(mainpath,"w")
+        for i in self.tds:
+            fl.write(i+"||"+self.tds[i].description+"||"+self.tds[i].date+"\n")
+        fl.close()
+        return
+
+    def list_tds(self):
+        for i in self.tds:
+            print self.tds[i].date,self.tds[i].description
+        return
+
 
 """
 FUNCTIONS
@@ -66,14 +116,21 @@ def construct_parser():
     parser.add_argument("-d","--delete",help="delete an item")
     parser.add_argument("-e","--edit",help="edit an item")
     parser.add_argument("-a","--add",help="add an item")
+    parser.add_argument("-s","--show",help="show all the items in a list",action="store_true")
     parser.add_argument("-m","--makelist",help="create a list",action="store_true")
     return parser
 
 if __name__ == "__main__":
     args = construct_parser().parse_args()
-    print args
     if args.makelist:
         tdl = TDList(args.folder,args.list,create=True)
         sys.exit(0)
-    if args.delete:
-        print "delete"
+    #not creating a list so doing something else
+    tdl = TDList(args.folder,args.list,create=False)
+    if args.add:
+        tdl.add_td(args.add)
+    elif args.delete:
+        tdl.del_td(args.delete)
+    elif args.show:
+        tdl.list_tds()
+    tdl.write_tds()
